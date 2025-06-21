@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>네모 주인공 플랫포머 탄막게임</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: black;
+      height: 100%;
+    }
+    canvas {
+      display: block;
+      background: #111;
+    }
+  </style>
+</head>
+<body>
+<audio id="bgm" src="assets/music/main-theme.mp3" loop autoplay></audio>
+<canvas id="gameCanvas"></canvas>
+<script>
+  const canvas = document.getElementById("gameCanvas");
+  const ctx = canvas.getContext("2d");
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
+
+  const gravity = 0.5;
+  const keys = { a: false, d: false, w: false };
+
+  const player = {
+    x: 100,
+    y: 100,
+    width: 30,
+    height: 30,
+    color: "lime",
+    dx: 0,
+    dy: 0,
+    speed: 3,
+    jumpPower: -10,
+    onGround: false
+  };
+
+  function drawPlayer() {
+    ctx.fillStyle = player.color;
+    ctx.fillRect(player.x, player.y, player.width, player.height);
+  }
+
+  function updatePlayer() {
+    if (keys.a) player.dx = -player.speed;
+    else if (keys.d) player.dx = player.speed;
+    else player.dx = 0;
+
+    if (keys.w && player.onGround) {
+      player.dy = player.jumpPower;
+      player.onGround = false;
+    }
+
+    player.dy += gravity;
+
+    player.x += player.dx;
+    player.y += player.dy;
+
+    if (player.y + player.height >= canvas.height) {
+      player.y = canvas.height - player.height;
+      player.dy = 0;
+      player.onGround = true;
+    }
+
+    if (player.x < 0) player.x = 0;
+    if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+  }
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "a") keys.a = true;
+    if (e.key === "d") keys.d = true;
+    if (e.key === "w") keys.w = true;
+  });
+
+  document.addEventListener("keyup", e => {
+    if (e.key === "a") keys.a = false;
+    if (e.key === "d") keys.d = false;
+    if (e.key === "w") keys.w = false;
+  });
+
+  function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    updatePlayer();
+    drawPlayer();
+    requestAnimationFrame(gameLoop);
+  }
+
+  gameLoop();
+
+  // 음악 자동 재생 (사용자 상호작용 필요할 수 있음)
+  const bgm = document.getElementById("bgm");
+  document.addEventListener("click", () => {
+    bgm.play();
+  });
+</script>
+</body>
+</html>
